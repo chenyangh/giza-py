@@ -8,6 +8,8 @@ from giza_aligner import HmmGizaAligner, Ibm1GizaAligner, Ibm2GizaAligner, Ibm3G
 def main() -> None:
     parser = argparse.ArgumentParser(description="Aligns the parallel corpus for an experiment")
     parser.add_argument("--bin", type=str, default=".bin", metavar="PATH", help="The mgiza++ folder")
+    parser.add_argument("--model-path", type=str, default=None, metavar="PATH", help="The path to the model")
+    parser.add_argument("--inference", action='store_true', default=False, help="Inference mode")
     parser.add_argument("--source", type=str, required=True, metavar="PATH", help="The source corpus")
     parser.add_argument("--target", type=str, required=True, metavar="PATH", help="The target corpus")
     parser.add_argument("--alignments", type=str, default=None, metavar="PATH", help="The output alignments")
@@ -56,7 +58,13 @@ def main() -> None:
     ]
 
     with tempfile.TemporaryDirectory() as td:
-        temp_dir = Path(td)
+        if args.model_path is not None:
+            temp_dir = Path(args.model_path)
+            # make sure the directory exists
+            temp_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            temp_dir = Path(td)
+        print(f"Temporary directory: {temp_dir}")
         if model == "ibm1":
             aligner = Ibm1GizaAligner(bin_dir, temp_dir, m1=args.m1)
         elif model == "ibm2":
@@ -72,8 +80,12 @@ def main() -> None:
 
         source_path = Path(args.source)
         target_path = Path(args.target)
+        
         print("Training...", end="" if args.quiet else "\n", flush=args.quiet)
-        aligner.train(source_path, target_path, quiet=args.quiet, optArgs=optArgs)
+        if args.inference:
+            aligner.inference(source_path, target_path, quiet=args.quiet, optArgs=optArgs)
+        else:
+            aligner.train(source_path, target_path, quiet=args.quiet, optArgs=optArgs)
         if args.quiet:
             print(" done.")
 

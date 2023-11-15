@@ -73,10 +73,12 @@ class GizaAligner:
 
         src_trg_prefix = src_trg_snt_file_path.with_suffix("")
         src_trg_output_prefix = src_trg_prefix.parent / (src_trg_prefix.name + "_invswm")
+        print("src_trg_path: ", src_trg_snt_file_path)
         self._execute_mgiza(src_trg_snt_file_path, src_trg_output_prefix, quiet, optArgs=optArgs)
         src_trg_alignments_file_path = src_trg_output_prefix.with_suffix(f".A{self.file_suffix}.all")
         self._save_alignments(src_trg_output_prefix, src_trg_alignments_file_path)
 
+        print("trg_src_path: ", trg_src_snt_file_path)
         trg_src_output_prefix = src_trg_prefix.parent / (src_trg_prefix.name + "_swm")
         self._execute_mgiza(trg_src_snt_file_path, trg_src_output_prefix, quiet, optArgs=optArgs)
         trg_src_alignments_file_path = trg_src_output_prefix.with_suffix(f".A{self.file_suffix}.all")
